@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Reader</title>
+</head>
+
+<body>
+    <input type="file" id="fileInput" accept=".txt">
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('fileInput').addEventListener('change', function (event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            reader.onload = function () {
+                console.time('Code execution time');
+                const numbers = reader.result.split('\n').map(Number);
+                const statistics = findStatistics(numbers);
+                console.log('Максимальное число:', statistics.max);
+                console.log('Минимальное число:', statistics.min);
+                console.log('Медиана:', statistics.median);
+                console.log('Среднее арифметическое:', statistics.average);
+                console.log('Длина самой длинной возрастающей последовательности:', statistics.maxIncreasingSeq);
+                console.log('Длина самой длинной убывающей последовательности:', statistics.maxDecreasingSeq);
+                // console.log(numbers);
+                console.timeEnd('Code execution time');
+            };
+
+            reader.readAsText(file);
+        });
+
+        function findStatistics(numbers) {
+                let max = numbers[0];
+                let min = numbers[0];
+                let sum = numbers[0];
+                let increasingSeq = 1;
+                let maxIncreasingSeq = 1;
+                let decreasingSeq = 1;
+                let maxDecreasingSeq = 1;
+
+                for (let i = 1; i < numbers.length; i++) {
+                    const num = numbers[i];
+                    max = Math.max(max, num);
+                    min = Math.min(min, num);
+                    sum += num;
+
+                    if (num > numbers[i - 1]) {
+                        increasingSeq++;
+                        maxIncreasingSeq = Math.max(maxIncreasingSeq, increasingSeq);
+                    } else {
+                        increasingSeq = 1;
+                    }
+
+                    if (num < numbers[i - 1]) {
+                        decreasingSeq++;
+                        maxDecreasingSeq = Math.max(maxDecreasingSeq, decreasingSeq);
+                    } else {
+                        decreasingSeq = 1;
+                    }
+                }
+
+                const sortedNumbers = numbers.slice().sort((a, b) => a - b);
+                const middle = Math.floor(sortedNumbers.length / 2);
+                const median = sortedNumbers.length % 2 === 0 ? (sortedNumbers[middle - 1] + sortedNumbers[middle]) / 2 : sortedNumbers[middle];
+                const average = sum / numbers.length;
+
+                return {
+                    max,
+                    min,
+                    median,
+                    average,
+                    maxIncreasingSeq,
+                    maxDecreasingSeq
+                };
+            }
+    </script>
+</body>
+
+</html>
