@@ -17,66 +17,106 @@
             const reader = new FileReader();
             reader.onload = function () {
                 console.time('Code execution time');
-                const numbers = reader.result.split('\n').map(Number);
-                const statistics = findStatistics(numbers);
-                console.log('Максимальное число:', statistics.max);
-                console.log('Минимальное число:', statistics.min);
-                console.log('Медиана:', statistics.median);
-                console.log('Среднее арифметическое:', statistics.average);
-                console.log('Длина самой длинной возрастающей последовательности:', statistics.maxIncreasingSeq);
-                console.log('Длина самой длинной убывающей последовательности:', statistics.maxDecreasingSeq);
-                // console.log(numbers);
+                const numbers = reader.result.split('\n')
+                    .filter(line => line.trim() !== '')
+                    .map(Number);
+                const max = findMax(numbers);
+                const min = findMin(numbers);
+                const median = findMedian(numbers);
+                const average = findAverage(numbers);
+                const maxIncreasingSeq = findMaxIncreasingSeq(numbers);
+                const maxDecreasingSeq = findMaxDecreasingSeq(numbers);
+                displayResults(max, min, median, average, maxIncreasingSeq, maxDecreasingSeq);
                 console.timeEnd('Code execution time');
             };
 
             reader.readAsText(file);
         });
 
-        function findStatistics(numbers) {
-                let max = numbers[0];
-                let min = numbers[0];
-                let sum = numbers[0];
-                let increasingSeq = 1;
-                let maxIncreasingSeq = 1;
-                let decreasingSeq = 1;
-                let maxDecreasingSeq = 1;
+        const displayResults = (max, min, median, average, maxIncreasingSeq, maxDecreasingSeq) => {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = `
+                <p>Максимальне число: ${max}</p>
+                <p>Мінімальне число: ${min}</p>
+                <p>Медіана: ${median}</p>
+                <p>Середнє арифметичне: ${average}</p>
+                <p>Найдовша зростаюча послідовність: ${maxIncreasingSeq.join(', ')}</p>
+                <p>Найдовша спадна послідовність: ${maxDecreasingSeq.join(', ')}</p>
+            `;
+        }
 
-                for (let i = 1; i < numbers.length; i++) {
-                    const num = numbers[i];
-                    max = Math.max(max, num);
-                    min = Math.min(min, num);
-                    sum += num;
-
-                    if (num > numbers[i - 1]) {
-                        increasingSeq++;
-                        maxIncreasingSeq = Math.max(maxIncreasingSeq, increasingSeq);
-                    } else {
-                        increasingSeq = 1;
-                    }
-
-                    if (num < numbers[i - 1]) {
-                        decreasingSeq++;
-                        maxDecreasingSeq = Math.max(maxDecreasingSeq, decreasingSeq);
-                    } else {
-                        decreasingSeq = 1;
-                    }
+        const findMax = (arr) => {
+            let max = arr[0];
+            for (let i = 1; i < arr.length; i++) {
+                if (!isNaN(arr[i]) && arr[i] > max) {
+                    max = arr[i];
                 }
-
-                const sortedNumbers = numbers.slice().sort((a, b) => a - b);
-                const middle = Math.floor(sortedNumbers.length / 2);
-                const median = sortedNumbers.length % 2 === 0 ? (sortedNumbers[middle - 1] + sortedNumbers[middle]) / 2 : sortedNumbers[middle];
-                const average = sum / numbers.length;
-
-                return {
-                    max,
-                    min,
-                    median,
-                    average,
-                    maxIncreasingSeq,
-                    maxDecreasingSeq
-                };
             }
+            return max;
+        }
+
+        const findMin = (arr) => {
+            let min = arr[0];
+            for (let i = 1; i < arr.length; i++) {
+                if (!isNaN(arr[i]) && arr[i] < min) {
+                    min = arr[i];
+                }
+            }
+            return min;
+        }
+
+        const findMedian = (arr) => {
+            const sortedArr = arr.slice().sort((a, b) => a - b);
+            const middle = Math.floor(sortedArr.length / 2);
+            if (sortedArr.length % 2 === 0) {
+                return (sortedArr[middle - 1] + sortedArr[middle]) / 2;
+            } else {
+                return sortedArr[middle];
+            }
+        }
+
+        const findAverage = (arr) => {
+            const sum = arr.reduce((acc, cur) => acc + cur, 0);
+            return sum / arr.length;
+        }
+
+        const findMaxIncreasingSeq = (arr) => {
+            let currentSeq = [arr[0]];
+            let maxSeq = [];
+
+            for (let i = 1; i < arr.length; i++) {
+                if (arr[i] > arr[i - 1]) {
+                    currentSeq.push(arr[i]);
+                } else {
+                    if (currentSeq.length > maxSeq.length) {
+                        maxSeq = currentSeq;
+                    }
+                    currentSeq = [arr[i]];
+                }
+            }
+
+            return maxSeq;
+        }
+
+        const findMaxDecreasingSeq = (arr) => {
+            let currentSeq = [arr[0]];
+            let maxSeq = [];
+
+            for (let i = 1; i < arr.length; i++) {
+                if (arr[i] < arr[i - 1]) {
+                    currentSeq.push(arr[i]);
+                } else {
+                    if (currentSeq.length > maxSeq.length) {
+                        maxSeq = currentSeq;
+                    }
+                    currentSeq = [arr[i]];
+                }
+            }
+
+            return maxSeq;
+        }
     </script>
 </body>
 
 </html>
+
